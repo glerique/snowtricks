@@ -1,0 +1,21 @@
+ {% extends 'base.html.twig' %}
+
+{% block title %}tricks!{% endblock %}
+
+{% block body %}
+<div class="container"> 
+ <h1> {{ trick.name }}</h1>
+
+
+<img src="{{ asset('uploads/images/' ~ trick.coverImage) }}" class="img-fluid" alt="Responsive image" > 
+        
+    
+
+    <div class="row">
+        <div class="col-md-8 mb-3">
+         {{ trick.description  }}  
+        </div>         
+    </div>
+</div>
+     
+ {% endblock %}

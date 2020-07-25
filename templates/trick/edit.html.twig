@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modification d'un trick{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <h1 class="my-5">{{ trick.name }}</h1>
+
+       
+        {{ form_start(form) }}
+
+        {{ form_widget(form) }}
+
+        <button type="submit" class="btn btn-primary">Modifier le trick</button>
+
+        {{ form_end(form) }}
+       
+           
+            
+           
+    </div>
+
+{% endblock %}
