@@ -77,10 +77,10 @@ class AppFixtures extends Fixture
             $slug =  $slugger->slug($name);
             $trick = new Trick();
             $trick->setName($name)
-                ->setDescription("content$i")
+                ->setDescription("description$i")
                 ->setCreatedAt(new \DateTime('now'))
                 ->setSlug($slug)
-                ->setCoverImage("uploads/images/720.jpg")
+                ->setCoverImage("720.jpg")
                 ->setCategory($category)
                 ->setUser($user);
 
@@ -115,7 +115,7 @@ class AppFixtures extends Fixture
         for ($i = 1; $i < 11; $i++) {
             $trick = $tricks[mt_rand(0, count($tricks) - 1)];
             $video = new Video();
-            $video->setUrl("url$i")
+            $video->setUrl("1080.jpg")
                 ->setCaption("caption$i")
                 ->setTrick($trick);
 
