@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Création d'un trick{% endblock %}
+
+
+{% block body %}
+
+    <div class="container">
+        <h1 class="my-5">Créer un nouveau trick</h1>
+
+       
+        {{ form_start(form) }}
+
+        {{ form_widget(form) }}
+
+        <button type="submit" class="btn btn-primary">Créer le trick</button>
+
+        {{ form_end(form) }}
+       
+           
+            
+           
+    </div>
+
+{% endblock %}

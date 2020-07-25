@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos tricks!{% endblock %}
+{% block body %}
+
+
+
+
+
+    <div class="jumbotron-fluid">
+         
+         <div class="container" style="height: 800px;">
+         
+        <h1 class="display-3" mt-5>Bienvenue sur Snowtricks !</h1>
+        <p class="lead">Site participatif pour fans de snowboard</p>      
+        
+        </div>
+
+</div>  
+<div class="container">
+<h1>Consultez nos différents tricks</h1>
+<a href="#tricks"><i class="fas fa-chevron-down fa-4x chevron-down"></i></a>
+ <div class="row"> 
+
+    
+{% for trick in tricks %}
+{% set url = path('tricks_show', {slug : trick.slug}) %}
+
+
+<div class="col-md-4">
+    <div class="card bg-light mb-3">
+        <div class="card-header text-center">
+             <br>
+       <h1> {{ trick.name }}</h1>
+            
+        </div>
+        
+        <a href="{{ url }}">
+            <img src="{{ asset('uploads/images/' ~ trick.coverImage) }} " alt="Image du trick" style="height: 200px; width: 100%; display: block">
+            
+        </a>
+
+        <div class="card-body">
+            <h4 class="card-title">
+                <a href="">
+                   
+                </a>
+            </h4>
+            
+            <a href="{{ url }}" class="btn btn-primary float-right">Voir le trick !</a>            
+        </div>
+    </div>
+</div>
+
+{% endfor %}
+</div>
+</div>
+{% endblock %}
