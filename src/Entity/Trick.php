@@ -2,13 +2,21 @@
 
 namespace App\Entity;
 
-use App\Repository\TrickRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\TrickRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TrickRepository::class)
+ * @ORM\HasLifecycleCallbacks
+ * @UniqueEntity(
+ * fields={"name"},
+ * message="Un autre trick porte déjà ce nom")
  */
 class Trick
 {
@@ -21,6 +29,7 @@ class Trick
 
     /**
      * @ORM\Column(type="string", length=255)
+     *  @Assert\Length(min=2, max=20, minMessage="Votre description ne peut pas faire moins de 2 caractères", maxMessage="Votre nom de trick ne doit pas dépasser plus de 20 caractères")
      */
     private $name;
 
@@ -46,6 +55,7 @@ class Trick
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Merci d'ajouter une image de couverture")
      */
     private $slug;
 
@@ -81,6 +91,31 @@ class Trick
         $this->images = new ArrayCollection();
         $this->videos = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->createdAt = new \DateTime('now');
+    }
+
+    /**
+     * Creation d'un slug en fonction du titre d'un trick
+     *
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     * 
+     * @return void
+     */
+    public function createSlug()
+    {
+
+        $slugger = new AsciiSlugger();
+        $this->slug =  $slugger->slug($this->name)->lower();
+    }
+    /**
+     * Creation de la date de modification d'un trick
+     *      
+     * @ORM\PreUpdate()
+     */
+    public function updateModifiedAt() {
+        // update the modified time
+        $this->setModifiedAt(new \DateTime('now'));
     }
 
     public function getId(): ?int
