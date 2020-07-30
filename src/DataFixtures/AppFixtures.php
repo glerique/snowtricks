@@ -10,46 +10,52 @@ use App\Entity\Video;
 use App\Entity\Comment;
 use App\Entity\Category;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager;
+use \Doctrine\Persistence\ObjectManager;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class AppFixtures extends Fixture
 {
-    public function load(ObjectManager $manager)
+    private $encoder;
+    
+    public function __construct(UserPasswordEncoderInterface $encoder){
+        $this->encoder = $encoder;
+
+
+    }
+
+    public function load( ObjectManager $manager)
     {
 
-        $admin = new Role;
-        $admin->setName("ROLE_ADMIN");
+        $adminRole = new Role;
+        $adminRole->setName("ROLE_ADMIN");
+        $manager->persist($adminRole);
+        
 
-        $manager->persist($admin);
-
-        $role = new Role;
-        $role->setName("ROLE_USER");
-
-        $manager->persist($role);
-
-        $adminUser = new User();
-        $adminUser->setLastName("lerique")
+        $user = new User();
+        $password = $this->encoder->encodePassword($user, 'password');
+        $user->setLastName("lerique")
             ->setfirstName("gael")
             ->setEmail("gael.maing59@gmail.com")
             ->setNickname("glerique")
-            ->setPassword("admin")
-            ->setRoles($admin)
-            ->setAvatar("avatarAdmin");
+            ->setPassword($password)            
+            ->setAvatar("avatar.png")
+            ->addUserRole($adminRole);
 
-        $manager->persist($adminUser);
+        $manager->persist($user);
 
-
+        
         $users = [];
         for ($i = 1; $i < 11; $i++) {
             $user = new User();
+
+            
             $user->setLastName("nom$i")
                 ->setfirstName("prenom$i")
                 ->setEmail("mail$i@gmail.com")
                 ->setNickname("nickname$i")
-                ->setPassword("mdp$i")
-                ->setRoles($role)
-                ->setAvatar("avatar$i");
+                ->setPassword("$password")                
+                ->setAvatar("avatar.png");
 
             $manager->persist($user);
             $users[] = $user;

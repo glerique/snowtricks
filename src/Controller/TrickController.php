@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
@@ -20,7 +22,7 @@ class TrickController extends AbstractController
      * Pour créer un trick
      *
      * @Route("/tricks/new", name="tricks_create")
-     * 
+     * @IsGranted("ROLE_USER")
      * 
      * @return Response
      */
@@ -79,6 +81,7 @@ class TrickController extends AbstractController
      * Pour modifier un trick
      * 
      * @Route("/tricks/{slug}/edit", name="tricks_edit")
+     * @Security("is_granted('ROLE_USER') and user === trick.getUser()", message="Vous ne pouvez pas modifier ce Trick")
      * 
      * @return Response
      */
@@ -170,6 +173,7 @@ class TrickController extends AbstractController
      * Pour effacer un trick
      * 
      * @Route("/tricks/{slug}/delete", name="tricks_delete")
+     * @Security("is_granted('ROLE_USER') and user === trick.getUser()", message="Vous ne pouvez pas supprimer ce Trick")
      * @return Response
      * 
      */

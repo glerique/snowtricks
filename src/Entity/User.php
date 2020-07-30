@@ -2,15 +2,28 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ *  @ORM\HasLifecycleCallbacks
+ * @UniqueEntity(
+ * fields={"email"},
+ * message="Un autre utilisateur possède déjà cette adresse mail")
+ *@UniqueEntity(
+ * fields={"nickname"},
+ * message="Un autre utilisateur possède déjà ce pseudo") 
  */
-class User
+
+
+class User implements UserInterface
 {
     /**
      * @ORM\Id()
@@ -26,16 +39,19 @@ class User
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Vous devez renseigner votre nom ")
      */
     private $lastName;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Vous devez renseigner votre prénom")
      */
     private $nickname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Vous devez renseigner un pseudo")
      */
     private $email;
 
@@ -45,15 +61,14 @@ class User
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @Assert\EqualTo(propertyPath="password", message="Vous n'avez pas correctement confirmé votre mot de passe !")
      */
-    private $avatar;
+    private $confirmPassword;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Role::class, inversedBy="users")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\Column(type="string", length=255)     * 
      */
-    private $roles;
+    private $avatar;    
 
     /**
      * @ORM\OneToMany(targetEntity=Trick::class, mappedBy="user", orphanRemoval=true)
@@ -65,10 +80,16 @@ class User
      */
     private $comments;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Role::class, mappedBy="users")
+     */
+    private $userRoles;
+
     public function __construct()
     {
         $this->tricks = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->userRoles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -136,6 +157,18 @@ class User
         return $this;
     }
 
+    public function getConfirmPassword(): ?string
+    {
+        return $this->confirmPassword;
+    }
+
+    public function setConfirmPassword(string $confirmPassword): self
+    {
+        $this->confirmPassword = $confirmPassword;
+
+        return $this;
+    }
+
     public function getAvatar(): ?string
     {
         return $this->avatar;
@@ -146,19 +179,7 @@ class User
         $this->avatar = $avatar;
 
         return $this;
-    }
-
-    public function getRoles(): ?Role
-    {
-        return $this->roles;
-    }
-
-    public function setRoles(?Role $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
+    }    
 
     /**
      * @return Collection|Trick[]
@@ -217,6 +238,53 @@ class User
             if ($comment->getUser() === $this) {
                 $comment->setUser(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getSalt() {}
+    
+    public function getRoles() {
+        $roles = $this->userRoles->map(function($role){
+            return $role->getName();
+        })->toArray();
+
+        $roles[] = 'ROLE_USER';
+
+        return $roles;
+    }
+    
+    public function getUsername() {
+        return $this->email;
+    }
+
+    public function eraseCredentials() {
+    }
+
+    /**
+     * @return Collection|Role[]
+     */
+    public function getUserRoles(): Collection
+    {
+        return $this->userRoles;
+    }
+
+    public function addUserRole(Role $userRole): self
+    {
+        if (!$this->userRoles->contains($userRole)) {
+            $this->userRoles[] = $userRole;
+            $userRole->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRole(Role $userRole): self
+    {
+        if ($this->userRoles->contains($userRole)) {
+            $this->userRoles->removeElement($userRole);
+            $userRole->removeUser($this);
         }
 
         return $this;
