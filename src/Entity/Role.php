@@ -25,7 +25,7 @@ class Role
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity=User::class, mappedBy="roles", orphanRemoval=true)
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="userRoles")
      */
     private $users;
 
@@ -33,6 +33,8 @@ class Role
     {
         $this->users = new ArrayCollection();
     }
+
+    
 
     public function getId(): ?int
     {
@@ -63,7 +65,6 @@ class Role
     {
         if (!$this->users->contains($user)) {
             $this->users[] = $user;
-            $user->setRoles($this);
         }
 
         return $this;
@@ -73,12 +74,8 @@ class Role
     {
         if ($this->users->contains($user)) {
             $this->users->removeElement($user);
-            // set the owning side to null (unless already changed)
-            if ($user->getRoles() === $this) {
-                $user->setRoles(null);
-            }
         }
 
         return $this;
-    }
+    }   
 }
