@@ -29,12 +29,13 @@ class Trick
 
     /**
      * @ORM\Column(type="string", length=255)
-     *  @Assert\Length(min=2, max=20, minMessage="Votre description ne peut pas faire moins de 2 caractères", maxMessage="Votre nom de trick ne doit pas dépasser plus de 20 caractères")
+     * @Assert\NotBlank(message="Vous devez renseigner un nom au trick")
      */
     private $name;
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\Length(min=2, max=20, minMessage="Votre description ne peut pas faire moins de 2 caractères", maxMessage="Votre nom de trick ne doit pas dépasser plus de 20 caractères")    
      */
     private $description;
 
