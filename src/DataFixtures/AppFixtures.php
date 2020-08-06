@@ -40,7 +40,9 @@ class AppFixtures extends Fixture
             ->setNickname("glerique")
             ->setPassword($password)            
             ->setAvatar("avatar.png")
+            ->setToken(md5(bin2hex(openssl_random_pseudo_bytes(6))))
             ->addUserRole($adminRole);
+            
 
         $manager->persist($user);
 
@@ -55,7 +57,8 @@ class AppFixtures extends Fixture
                 ->setEmail("mail$i@gmail.com")
                 ->setNickname("nickname$i")
                 ->setPassword("$password")                
-                ->setAvatar("avatar.png");
+                ->setAvatar("avatar.png")
+                ->setToken(md5(bin2hex(openssl_random_pseudo_bytes(6))));
 
             $manager->persist($user);
             $users[] = $user;
