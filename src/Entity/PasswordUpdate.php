@@ -7,29 +7,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class PasswordUpdate
 {
-   
-    private $email;
 
-    
+
     private $newPassword;
 
     /**
      * @Assert\EqualTo(propertyPath="newPassword", message="Vous n'avez pas correctement confirmé votre mot de passe !")
      */
     private $confirmPassword;
-
-    
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
 
     public function getNewPassword(): ?string
     {

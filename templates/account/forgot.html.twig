@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mot de passe oublié{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <h1>Vous avez oublié votre mot de passe ? </h1>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button type="submit" class="btn btn-success">Envoyer</button>
+    {{ form_end(form) }}
+    
+</div>
+
+{% endblock %}

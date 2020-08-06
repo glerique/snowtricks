@@ -66,7 +66,7 @@ class User implements UserInterface
     private $confirmPassword;
 
     /**
-     * @ORM\Column(type="string", length=255)     * 
+     * @ORM\Column(type="string", length=255)  
      */
     private $avatar;    
 
@@ -84,6 +84,16 @@ class User implements UserInterface
      * @ORM\ManyToMany(targetEntity=Role::class, mappedBy="users")
      */
     private $userRoles;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $token;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $validated;
 
     public function __construct()
     {
@@ -250,8 +260,9 @@ class User implements UserInterface
             return $role->getName();
         })->toArray();
 
+        if ($this->getValidated() != null){
         $roles[] = 'ROLE_USER';
-
+        }
         return $roles;
     }
     
@@ -286,6 +297,30 @@ class User implements UserInterface
             $this->userRoles->removeElement($userRole);
             $userRole->removeUser($this);
         }
+
+        return $this;
+    }
+
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
+
+    public function setToken(string $token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
+    public function getValidated(): ?bool
+    {
+        return $this->validated;
+    }
+
+    public function setValidated(?bool $validated): self
+    {
+        $this->validated = $validated;
 
         return $this;
     }
