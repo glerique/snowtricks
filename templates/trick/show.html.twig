@@ -16,6 +16,50 @@
          {{ trick.description  }}  
         </div>         
     </div>
-</div>
-     
+{% if app.user %}
+		{{ form_start(form) }}
+
+        {{ form_widget(form) }}
+
+        <button type="submit" class="btn btn-primary">Envoyer</button>
+
+        {{ form_end(form) }}	
+					{% else %}
+						<div class="text-center">
+							<h3>Se connecter pour commenter</h3>
+							<a href="{{ path('account_login') }}" class="btn btn-info">Connexion</a>
+						</div>
+					{% endif %}
+
+<hr>
+
+            {% if trick.comments|length > 0 %}
+                <h2 class="mb-3">Commentaires des utilisateurs :</h2>
+
+               
+
+                {% for comment in trick.comments %}
+                
+                    
+                    <div class="row post-comment">
+                        
+                        <h6 class="col-sm-3">
+                    <img src="{{ asset('/img/' ~ comment.user.avatar) }}" class="img-fluid avatar"/ WIDTH=50>
+                        <strong>{{ comment.user.nickname }}</strong><br/> publié le {{ comment.createdAT|date("d/m/Y") }}<br />
+                        
+                        </h6>
+                        <div class="col-sm-9">
+                        <blockquote>
+                        {{comment.content}}
+                         </blockquote>
+                        </div>
+
+                    </div>
+                      <hr>      
+
+                {% endfor %}
+            {% else %}
+                <h2 class="mb-3">Ce Trick n'a pas encore reçu de commentaires ...</h2>
+            {% endif %}
+ </div>    
  {% endblock %}
