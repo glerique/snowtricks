@@ -51,12 +51,13 @@ class Trick
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
      */
     private $coverImage;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Merci d'ajouter une image de couverture")
+     * 
      */
     private $slug;
 

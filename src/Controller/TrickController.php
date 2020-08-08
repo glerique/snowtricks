@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Trick;
+use App\Entity\Comment;
 use App\Form\TrickType;
+use App\Form\CommentType;
 use App\Repository\TrickRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -128,7 +130,7 @@ class TrickController extends AbstractController
             );
 
             return $this->redirectToRoute('tricks_show', [
-                'slug' => $trick->getSlug()
+                'slug' => $trick->getSlug(),                
             ]);
         }
 
@@ -162,9 +164,33 @@ class TrickController extends AbstractController
      * 
      * @return Response
      */
-    public function show(Trick $trick)
+    public function show(Request $request,  Trick $trick, EntityManagerInterface $manager)
     {
+        
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        
+        $form->handleRequest($request);
+        
+        if($form->isSubmitted() && $form->isValid()){
+
+            $user= $this->getUser();
+            $comment->setTrick($trick)
+                    ->setUser($user);
+            $manager->persist($comment);
+            $manager->flush();
+
+            $this->addFlash(
+                'success',
+                "Le commentaire a bien été enregistré"
+            );
+
+            return $this->redirectToRoute('tricks_show', [
+                'slug' => $trick->getSlug()
+            ]);
+        }
         return $this->render('trick/show.html.twig', [
+            'form' => $form->createView(),
             'trick' => $trick
         ]);
     }
