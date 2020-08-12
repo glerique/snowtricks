@@ -33,4 +33,32 @@ updateCounter();
 
 handleDeleteButton();
 
+$("#add_video").click(function(){
+    const indexVideo = +$("#widgets-counter-videos").val();
+
+    const tmplVideo = $("#trick_videos").data("prototype").replace(/__name__/g, indexVideo);
+
+    $("#trick_videos").append(tmplVideo);
+
+    $("#widgets-counter-videos").val(indexVideo + 1);
+    handleVideoDeleteButton();
+});
+
+function handleVideoDeleteButton(){
+    $('button[data-action="delete"]').click(function(){
+        const targetVideo = this.dataset.target;
+        $(targetVideo).remove();
+    });
+}
+
+
+function updateVideoCounter(){
+    const countVideo = $("#trick_videos div.form-group").length;
+    $("#widgets-counter-videos").val(countVideo);
+}
+
+updateVideoCounter();
+
+handleVideoDeleteButton();
+
 
