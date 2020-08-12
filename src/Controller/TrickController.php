@@ -2,10 +2,14 @@
 
 namespace App\Controller;
 
+
+use App\Entity\Image;
 use App\Entity\Trick;
 use App\Entity\Comment;
 use App\Form\TrickType;
 use App\Form\CommentType;
+use App\Service\FileUploader;
+use App\Service\ImageUploader;
 use App\Repository\TrickRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,42 +30,35 @@ class TrickController extends AbstractController
      * @Route("/tricks/new", name="tricks_create")
      * @IsGranted("ROLE_USER")
      * 
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @param ImageUploader $imageUploader
+     * @param FileUploader $fileUploader
      * @return Response
      */
-    public function create(Request $request, EntityManagerInterface $manager, SluggerInterface $slugger)
-    {
+    public function create(Request $request, EntityManagerInterface $manager, ImageUploader $imageUploader, FileUploader $fileUploader)
+    { 
         $trick = new Trick();
+       
         $form = $this->createForm(TrickType::class, $trick);
         $form->handleRequest($request);
 
-
-
-        if ($form->isSubmitted() && $form->isvalid()) {
+        if ($form->isSubmitted() && $form->isvalid()) {            
+            
             $imageFile = $form->get('coverImage')->getData();
 
-            // this condition is needed because the 'brochure' field is not required
-            // so the PDF file must be processed only when a file is uploaded
             if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-                // Move the file to the directory where brochures are stored
-                try {
-                    $imageFile->move(
-                        $this->getParameter('images_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
-                }
-
-                // updates the 'brochureFilename' property to store the PDF file name
-                // instead of its contents
-                $trick->setCoverImage($newFilename);
+            $imageFileName = $fileUploader->upload($imageFile);
+            $trick->setCoverImage($imageFileName);
             }
 
+            foreach ($trick->getImages() as $image) {
+                $image->setTrick($trick);
+                $image = $imageUploader->uploadImage($image);
+
+                $manager->persist($image);
+            }
+            
             $manager->persist($trick);
             $manager->flush();
 
@@ -87,7 +84,7 @@ class TrickController extends AbstractController
      * 
      * @return Response
      */
-    public function edit(Trick $trick, Request $request, EntityManagerInterface $manager, SluggerInterface $slugger){
+    public function edit(Trick $trick, Request $request, EntityManagerInterface $manager, ImageUploader $imageUploader, FileUploader $fileUploader ){
         
        
         $form = $this->createForm(TrickType::class, $trick);
@@ -97,30 +94,25 @@ class TrickController extends AbstractController
             
             $imageFile = $form->get('coverImage')->getData();
 
-            // this condition is needed because the 'brochure' field is not required
-            // so the PDF file must be processed only when a file is uploaded
+            
+            
+            
             if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
-
-                // Move the file to the directory where brochures are stored
-                try {
-                    $imageFile->move(
-                        $this->getParameter('images_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
+                $fileUploader->removeFile($trick->getCoverImage ());
+                $imageFileName = $fileUploader->upload($imageFile);
+                $trick->setCoverImage($imageFileName);
                 }
-
-                // updates the 'brochureFilename' property to store the PDF file name
-                // instead of its contents
-                $trick->setCoverImage($newFilename);
-            }
-            
-            
+                
+                $images = $form->get('images')->getData();
+                foreach ($images as $image) {                   
+                       
+                    $image->setTrick($trick);
+                    $image = $imageUploader->uploadImage($image);
+    
+                    $manager->persist($image);
+                
+                }
+                
             $manager->persist($trick);                      
             $manager->flush();
 
@@ -203,10 +195,16 @@ class TrickController extends AbstractController
      * @return Response
      * 
      */
-    public function delete(Trick $trick, EntityManagerInterface $manager){
+    public function delete(Trick $trick, EntityManagerInterface $manager, FileUploader $fileUploader){
         $manager->remove($trick);
         $manager->flush();
 
+            $fileUploader->removeFile($trick->getCoverImage ());
+            $images = $trick->getImages();
+            foreach ($images as $image) {
+                $fileUploader->removeFile($image->getPath());
+               
+            }
         $this->addFlash(
             'success',
             "Le trick {$trick->getName()} a bien été supprimé"
@@ -215,4 +213,25 @@ class TrickController extends AbstractController
         return $this->redirectToRoute('tricks_index');
 
     }
+
+   /**
+     * @Route("/tricks/delete/image/{id}", name="trick_delete_image")
+     * @param Image $image
+     * @param FileUploader $fileUploader
+     * @return Response
+     */
+    public function deleteImage( Image $image , EntityManagerInterface $manager,  FileUploader $fileUploader)
+    {
+        
+            $fileUploader->removeFile($image->getPath());
+            $manager->remove($image);
+            $manager->flush();
+            
+            $this->addFlash(
+                'success',
+                "Photo supprimée avec succès");
+               
+            return $this->redirectToRoute('tricks_index');        
+    }
+ 
 }

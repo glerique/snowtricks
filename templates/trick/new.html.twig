@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Création d'un trick{% endblock %}
-
+{% form_theme form 'trick/_collection.html.twig' %}
 
 {% block body %}
 
@@ -11,8 +11,8 @@
        
         {{ form_start(form) }}
 
-        {{ form_widget(form) }}
-
+            {{ form_widget(form) }}
+            
         <button type="submit" class="btn btn-primary">Créer le trick</button>
 
         {{ form_end(form) }}
@@ -23,3 +23,6 @@
     </div>
 
 {% endblock %}
+
+
+
