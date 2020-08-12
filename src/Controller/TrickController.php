@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\Image;
 use App\Entity\Trick;
+use App\Entity\Video;
 use App\Entity\Comment;
 use App\Form\TrickType;
 use App\Form\CommentType;
@@ -15,11 +16,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
 class TrickController extends AbstractController
 {
@@ -58,6 +57,12 @@ class TrickController extends AbstractController
 
                 $manager->persist($image);
             }
+
+            foreach ($trick->getVideos() as $video) {
+                $video->setTrick($trick);
+                $manager->persist($video);
+                
+            }
             
             $manager->persist($trick);
             $manager->flush();
@@ -82,6 +87,8 @@ class TrickController extends AbstractController
      * @Route("/tricks/{slug}/edit", name="tricks_edit")
      * @Security("is_granted('ROLE_USER') and user === trick.getUser()", message="Vous ne pouvez pas modifier ce Trick")
      * 
+     * @param Trick $trick
+     * @param Request $request
      * @return Response
      */
     public function edit(Trick $trick, Request $request, EntityManagerInterface $manager, ImageUploader $imageUploader, FileUploader $fileUploader ){
@@ -111,6 +118,12 @@ class TrickController extends AbstractController
     
                     $manager->persist($image);
                 
+                }                     
+                    
+                foreach ($trick->getVideos() as $video) {
+                    $video->setTrick($trick);
+                    $manager->persist($video);
+                    
                 }
                 
             $manager->persist($trick);                      
@@ -230,6 +243,26 @@ class TrickController extends AbstractController
             $this->addFlash(
                 'success',
                 "Photo supprimée avec succès");
+               
+            return $this->redirectToRoute('tricks_index');        
+    }
+
+
+    /**
+     * @Route("/tricks/delete/video/{id}", name="trick_delete_image")
+     * @param Video $video
+     * @return Response
+     */
+    public function deleteVideo( Video $video  , EntityManagerInterface $manager)
+    {
+        
+             
+            $manager->remove($video);
+            $manager->flush();
+            
+            $this->addFlash(
+                'success',
+                "Vidéo supprimée avec succès");
                
             return $this->redirectToRoute('tricks_index');        
     }
