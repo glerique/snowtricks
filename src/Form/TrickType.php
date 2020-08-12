@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use App\Entity\Trick;
 use App\Form\ImageType;
+use App\Form\VideoType;
 use App\Entity\Category;
 use App\Form\ApplicationType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -43,7 +44,15 @@ class TrickType extends ApplicationType
                     'allow_add' => true,
                     'allow_delete' => true
                 ]
-            );
+            )
+            ->add(
+                'videos', 
+                CollectionType::class,
+                [
+                    'entry_type' => VideoType::class,
+                    'allow_add' => true,
+                    'allow_delete' => true
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
