@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\ImageRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ImageRepository;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
@@ -26,6 +27,8 @@ class Image
      * @ORM\Column(type="string", length=255)
      */
     private $caption;
+
+    private $file;
 
     /**
      * @ORM\ManyToOne(targetEntity=Trick::class, inversedBy="images")
@@ -58,6 +61,18 @@ class Image
     public function setCaption(string $caption): self
     {
         $this->caption = $caption;
+
+        return $this;
+    }
+
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function setFile(UploadedFile $file): self
+    {
+        $this->file = $file;
 
         return $this;
     }
