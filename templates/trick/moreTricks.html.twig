@@ -1,0 +1,19 @@
+{% for trick in tricks %}
+{% set url = path('tricks_show', {slug : trick.slug}) %}
+<div class="col-md-4">
+    <div class="card bg-light mb-3">
+        <div class="card-header text-center">
+            <br>
+            <h1> {{ trick.name }}</h1>            
+        </div>
+
+        <a href="{{ url }}">
+            <img src="{{ asset('uploads/images/' ~ trick.coverImage) }} " alt="Image du trick" style="height: 200px; width: 100%; display: block">            
+        </a>
+
+        <div class="card-body">
+            <a href="{{ url }}" class="btn btn-primary float-right">Voir le trick !</a>            
+        </div>
+    </div>
+</div>
+{% endfor %}
