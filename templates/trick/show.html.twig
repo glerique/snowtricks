@@ -1,65 +1,179 @@
- {% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}tricks!{% endblock %}
+{% block title %}SnowTricks - {{ trick.name }}{% endblock %}
 
 {% block body %}
-<div class="container"> 
- <h1> {{ trick.name }}</h1>
+    <!-- Start Trick -->
+    <div class="container">  
+        <div class="row justify-content-center ">          
+            <div class="col-md-10 col-md-offset-1  mb-4">                              
+                <div class="card mt-3">
+                    <img class="card-img-top" src="{{ asset('uploads/images/' ~ trick.coverImage) }}" alt="{{ trick.name }}">
+                     
+                    <div class="card-body">                    
+                        <ul class="list-inline trick-data">
+                            <li class="list-inline-item">
+                                Par : {{ trick.user.username }}
+                            </li> |           
+                            <li class="list-inline-item">
+                                Ajouté le {{ trick.createdAt | date('d/m/Y') }} (<small>Mise à jour le : {% if trick.modifiedAt is defined %}{{ trick.modifiedAt | date('d/m/Y') }}{% endif %}</small>)
+                            </li> |                            
+                            <li class="list-inline-item">
+                                Catégorie : {{ trick.category.name }}
+                            </li> |
+                            <li class="list-inline-item">
+                                <a href="#comments-block">{{ trick.comments | length }} commentaires</a>
+                            </li> |
+                            {% if (app.user) %}
+                                {% set edit = path('tricks_edit', {slug : trick.slug}) %}
+                                {% set delete = path('tricks_delete', {slug : trick.slug}) %}
+                                <a  href="{{ edit }}" target="_blank"><i class="fas fa-pen"></i></a> |
+                                <a  href="{{ delete }}" onclick="return(confirm('Etes-vous sûr de vouloir supprimer ce trick ?'));"><i class="fas fa-trash-alt"></i></a> |
+                            {% endif %}    
+                        </ul>
+                        <hr>                        
+                        <h4 class="card-title"><strong>{{ trick.name }}</strong></h4> 
+                        <hr>
+                        <!-- Start Carousel -->
+                        {% if (images) or (videos) %}
+                            <div class="row d-none d-lg-flex load-media">
+                                <div class="col-lg-6 col-md-12">
+                                    <div id="carousel" class="carousel slide mt-3 mb-2" data-ride="carousel">
+                                        <ol class="carousel-indicators">
+                                            {% for image in images %}
+                                                <li data-target=".carousel" data-slide-to="{{ loop.index0 }}" {% if loop.index0 == 0 %} class="active" {% endif %}></li>
+                                            {% endfor %}
+                                        </ol>
+                                        <div class="carousel-inner enlarge">
+                                            {% for image in images %}
+                                                <div class="carousel-item {% if loop.index0 == 0 %} active {% endif %}">
+                                                    <img class="d-block" src="{{ asset('uploads/images/' ~ image.path) }}" alt="{{ image.path }}">
+                                                </div>
+                                            {% endfor %}        
+                                        </div>
+                                        <a class="carousel-control-prev" href="#carousel" data-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </a>
+                                        <a class="carousel-control-next" href="#carousel" data-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </a> 
+                                    </div>
+                                </div>                                          
+                                <div class="col-lg-6 col-md-12">
+                                    <div id="carousel-v" class="carousel slide mt-3 mb-2" data-ride="carousel">
+                                        <ol class="carousel-indicators">
+                                            {% for video in videos %}
+                                                <li data-target="#carousel-v" data-slide-to="{{ loop.index0 }}" {% if loop.index0 == 0 %} class="active" {% endif %}></li>
+                                            {% endfor %}
+                                        </ol>
+                                        <div class="carousel-inner">
+                                            {% for video in videos %}
+                                                <div class="carousel-item {% if loop.index0 == 0 %} active {% endif %}">
+                                                    <iframe src="{{ video.url }}" allowfullscreen></iframe>
+                                                </div>
+                                            {% endfor %}        
+                                        </div>
+                                        <a class="carousel-control-prev" href="#carousel-v" data-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </a>
+                                        <a class="carousel-control-next" href="#carousel-v" data-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </a> 
+                                    </div>
+                                </div>                                                  
+                            </div>                      
+                            <div class="text-center">
+                                <a href="#" id="loadMedia" class="d-md-block d-lg-none">
+                                    <button class="btn btn-outline-secondary">Afficher les médias</button>
+                                </a>
+                                <a href="#" id="hideMedia" class="d-none d-md-none d-lg-none">
+                                    <button class="btn btn-outline-secondary mt-3">Masquer les médias</button>
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="row justify-content-center">
+                                <div class="d-inline-block text-center no-medias">
+                                    <p class="mt-3 ml-3 mr-3">Pas de médias pour ce trick</p>
+                                </div>
+                            </div>                           
+                        {% endif %}
+                        <!-- End Carousel -->
+                        <hr>
+                        <h5 class="card-title">Description</h5>
+                        <p class="card-text text-justify">{{ trick.description }}</p>                                    
+                    </div>
+                </div>
+                <!--  End Trick -->
+         <hr>           
+            {% if app.user %}
+		        {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+                {{ form_end(form) }}	
+		
+            {% else %}
+				<div class="text-center">
+					<h3>Se connecter pour commenter</h3>
+					<a href="{{ path('account_login') }}" class="btn btn-info">Connexion</a>
+				</div>
+			{% endif %}
 
-
-<img src="{{ asset('uploads/images/' ~ trick.coverImage) }}" class="img-fluid" alt="Responsive image" > 
-        
-    
-
-    <div class="row">
-        <div class="col-md-8 mb-3">
-         {{ trick.description  }}  
-        </div>         
-    </div>
-{% if app.user %}
-		{{ form_start(form) }}
-
-        {{ form_widget(form) }}
-
-        <button type="submit" class="btn btn-primary">Envoyer</button>
-
-        {{ form_end(form) }}	
-					{% else %}
-						<div class="text-center">
-							<h3>Se connecter pour commenter</h3>
-							<a href="{{ path('account_login') }}" class="btn btn-info">Connexion</a>
-						</div>
-					{% endif %}
-
-<hr>
+        <hr>
 
             {% if trick.comments|length > 0 %}
                 <h2 class="mb-3">Commentaires des utilisateurs :</h2>
-
-               
-
-                {% for comment in trick.comments %}
-                
+               <div id ="listComments">
+                    {% for comment in trick.comments|sort|reverse|slice(0,3) %}
+                        <div class="row post-comment">                        
+                            <h6 class="col-sm-3">
+                            <img src="{{ asset('/img/' ~ comment.user.avatar) }}" class="img-fluid avatar"/ WIDTH=50>
+                            <strong>{{ comment.user.nickname }}</strong><br/> publié le {{ comment.createdAT|date("d/m/Y") }}<br />                        
+                             </h6>
+                            
+                            <div class="col-sm-9">
+                                <blockquote>
+                                    {{comment.content}}
+                                </blockquote>
+                            </div>
                     
-                    <div class="row post-comment">
-                        
-                        <h6 class="col-sm-3">
-                    <img src="{{ asset('/img/' ~ comment.user.avatar) }}" class="img-fluid avatar"/ WIDTH=50>
-                        <strong>{{ comment.user.nickname }}</strong><br/> publié le {{ comment.createdAT|date("d/m/Y") }}<br />
-                        
-                        </h6>
-                        <div class="col-sm-9">
-                        <blockquote>
-                        {{comment.content}}
-                         </blockquote>
                         </div>
+                      <hr>
+                    {% endfor %}
+                </div>
 
-                    </div>
-                      <hr>      
 
-                {% endfor %}
             {% else %}
                 <h2 class="mb-3">Ce Trick n'a pas encore reçu de commentaires ...</h2>
             {% endif %}
- </div>    
+            
+            {% if trick.comments|length >= 3 %}
+                <div class="row text-center">
+                    <button id="moreComments" class="btn btn-primary">Plus de commentaires</button>
+                </div>
+            {% endif %}
+    </div>    
  {% endblock %}
+ 
+ {% block javascripts %}
+    <script>
+        click = 0;
+
+        function moreComments(event) {
+            event.preventDefault();
+            click++;
+            var start = 3 * click;
+            const url = "{{ path('moreComments', {'slug': trick.slug}) }}" + '/' + start;
+            axios.get(url).then(function (response) {
+                $("#listComments").append(response.data);
+            }).catch(function (error) {
+                if (response.status === 403) {
+                    window.alert("Accès interdit !");
+                } else if (response.status === 404) {
+                    window.alert("Pas de commentaire !");
+                }
+            });
+        }
+
+        document.getElementById("moreComments").addEventListener("click", moreComments);
+    </script>
+{% endblock %}
