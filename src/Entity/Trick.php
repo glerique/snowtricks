@@ -29,13 +29,15 @@ class Trick
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank(message="Vous devez renseigner un nom au trick")
+     * @Assert\NotBlank(message="Vous devez renseigner un nom")
+     * @Assert\Length(min=3, max=255, minMessage="Le nom  doit faire plus de 3 caractères !", maxMessage="Le nom ne peut pas faire plus de 255 caractères")
      */
     private $name;
 
     /**
      * @ORM\Column(type="text")
-     * @Assert\Length(min=2, max=20, minMessage="Votre description ne peut pas faire moins de 2 caractères", maxMessage="Votre nom de trick ne doit pas dépasser plus de 20 caractères")    
+     * @Assert\NotBlank(message="Vous devez renseigner une description")
+     * @Assert\Length(min=10, max=255, minMessage="Votre description ne peut pas faire moins de 10 caractères", maxMessage="Votre description ne doit pas dépasser plus de 255 caractères")    
      */
     private $description;
 
@@ -51,6 +53,7 @@ class Trick
 
     /**
      * @ORM\Column(type="string", length=255)
+     * 
      * 
      */
     private $coverImage;
@@ -75,11 +78,13 @@ class Trick
 
     /**
      * @ORM\OneToMany(targetEntity=Image::class, mappedBy="trick", orphanRemoval=true)
+     * @Assert\Valid()
      */
     private $images;
 
     /**
      * @ORM\OneToMany(targetEntity=Video::class, mappedBy="trick", orphanRemoval=true)
+     * @Assert\Valid()
      */
     private $videos;
 
