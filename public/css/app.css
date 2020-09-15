@@ -1,0 +1,96 @@
+
+#mainImage {
+    width: 100%;
+    height: 100vh;
+    background: url("../img/image.jpg") top center;
+    background-size: cover;
+    position: relative;
+}
+
+#mainImage .mainImage-container {
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+#mainImage h1 {
+    margin: 0 0 10px 0;
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 56px;    
+    color: #fff;
+    text-shadow: -1px 0 2px #2f4d5a;
+}
+
+#mainImage .btn-get-started {
+    font-size: 36px;
+    display: inline-block;
+    padding: 4px 0;
+    border-radius: 50px;
+    transition: 0.3s ease-in-out;
+    margin: 10px;
+    width: 64px;
+    height: 64px;
+    text-align: center;
+    border: 2px solid #fff;
+    color: #fff;
+}
+
+#mainImage .btn-get-started:hover {
+    padding-top: 8px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+body { 
+    padding-top: 55px;
+    padding-bottom: 55px; 
+}
+
+
+
+div.carousel div.carousel-item > img {
+    width: 100%;
+    height: 18.75rem;
+}
+
+div.carousel div.carousel-item > iframe {
+    width: 100%;
+    height: 18.75rem;
+    border: 0;
+    display: block;
+}
+
+.carousel-indicators {
+    bottom: -50px;
+}
+
+.carousel-indicators li {
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    background-color: #ccc;
+}
+
+.carousel-inner {
+    margin-bottom: 50px;
+    border-radius: 0.625rem;
+    box-shadow: 0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px #5a61690f, 0 7px 70px rgba(90, 97, 105, 0.1);
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    top: 55px;
+    bottom: 55px;
+}
+
+ol {
+    margin: 0;
+}
+
