@@ -2,8 +2,10 @@
 
 namespace App\Entity;
 
-use App\Repository\VideoRepository;
+
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\VideoRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=VideoRepository::class)
@@ -19,11 +21,13 @@ class Video
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Url(message = "Url non valide")
      */
     private $url;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=4, minMessage="Le titre de la vidéo doit faire au moins 4 caractères")
      */
     private $caption;
 
