@@ -1,0 +1,17 @@
+{% for comment in trick.comments|sort|reverse|slice(start, start + 3) %}
+    {% if comment is not null %}
+        <div class="row post-comment">                        
+            <h6 class="col-sm-3">
+            <img src="{{ asset('/img/' ~ comment.user.avatar) }}" class="img-fluid avatar"/ WIDTH=50>
+            <strong>{{ comment.user.nickname }}</strong><br/> publié le {{ comment.createdAT|date("d/m/Y") }}<br />                        
+            </h6>
+                        
+            <div class="col-sm-9">
+                <blockquote>{{comment.content}}</blockquote>
+            </div>
+            <hr>
+        </div>
+        <hr>
+    {% endif %}
+{% endfor %}                    
+                    

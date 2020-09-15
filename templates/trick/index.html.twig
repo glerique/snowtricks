@@ -2,57 +2,72 @@
 
 {% block title %}Nos tricks!{% endblock %}
 {% block body %}
-
-
-
-
-
-    <div class="jumbotron-fluid">
-         
-         <div class="container" style="height: 800px;">
-         
+<section id="mainImage">
+    <div class="mainImage-container">
         <h1 class="display-3" mt-5>Bienvenue sur Snowtricks !</h1>
         <p class="lead">Site participatif pour fans de snowboard</p>      
+        <a class="btn btn-primary text-uppercase js-scroll-trigger float-right" href="#tricks">
+            <img src="{{ asset('img/down.svg') }}" height="25px">
+            </a>
+    </div>
+</section>   
+
+<section id ="tricks">
+    <div class="container mt-5">
+        <h1 class="display-4 mr-5" >Consultez nos différents tricks</h1>
+            <div class="row" id="listTricks">     
+                {% for trick in tricks %}
+                    {% set url = path('tricks_show', {slug : trick.slug}) %}
+                        <div class="col-md-4">
+                            <div class="card bg-light mb-3">
+                                <div class="card-header text-center">
+                                    <br>
+                                    <h1> {{ trick.name }}</h1>            
+                                </div>
         
-        </div>
+                                <a href="{{ url }}">
+                                    <img src="{{ asset('uploads/images/' ~ trick.coverImage) }} " alt="Image du trick" style="height: 200px; width: 100%; display: block">            
+                                </a>
+                                <div class="card-body">
+                                    <a href="{{ url }}" class="btn btn-primary float-right">Voir le trick !</a>            
+                                </div>
+                            </div>
+                        </div>
+                {% endfor %}
+</section>
 
-</div>  
-<div class="container">
-<h1>Consultez nos différents tricks</h1>
-<a href="#tricks"><i class="fas fa-chevron-down fa-4x chevron-down"></i></a>
- <div class="row"> 
-
-    
-{% for trick in tricks %}
-{% set url = path('tricks_show', {slug : trick.slug}) %}
-
-
-<div class="col-md-4">
-    <div class="card bg-light mb-3">
-        <div class="card-header text-center">
-             <br>
-       <h1> {{ trick.name }}</h1>
-            
-        </div>
-        
-        <a href="{{ url }}">
-            <img src="{{ asset('uploads/images/' ~ trick.coverImage) }} " alt="Image du trick" style="height: 200px; width: 100%; display: block">
-            
-        </a>
-
-        <div class="card-body">
-            <h4 class="card-title">
-                <a href="">
-                   
-                </a>
-            </h4>
-            
-            <a href="{{ url }}" class="btn btn-primary float-right">Voir le trick !</a>            
-        </div>
+<div class="row mt-3 mb-5">
+    <div class="col-12 text-center">
+        <button id="moreTricks" class="btn btn-primary">Plus de figures</button>
     </div>
 </div>
 
-{% endfor %}
-</div>
-</div>
+<div>
+    <a id="btn-up" href="#mainImage" class="btn btn-primary float-right js-scroll-trigger">
+        <img src="{{ asset('img/up.svg') }}" height="25px">
+    </a>
+</diV>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        click = 0;
+        function moreTricks(event) {
+            event.preventDefault();
+            click++;
+            var start = 9 * click;
+            const url = "{{ path('moreTricks') }}" + start;
+            axios.get(url).then(function(response) {
+                $("#listTricks").append(response.data);
+            }).catch(function (error) {
+                if (response.status === 403) {
+                    window.alert("Accès interdit !");
+                }
+                else if (response.status === 404) {
+                    window.alert("La page n'existe pas !");
+                }
+            });
+        }
+        document.getElementById("moreTricks").addEventListener("click", moreTricks);
+    </script>
 {% endblock %}

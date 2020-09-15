@@ -10,6 +10,7 @@ use App\Entity\Category;
 use App\Form\ApplicationType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -32,10 +33,19 @@ class TrickType extends ApplicationType
                 'attr' => [
                     'placeholder' => 'Image de couverture'
                 ],
-                'required' => false
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new File([
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image jpeg ou png',                        
+                    ])
+                ]
             ])
-            ->add('category', EntityType::class, $this->getEntityConfiguration(Category::class, 'Categorie', 'name'))
-            ->add('user', EntityType::class, $this->getEntityConfiguration(User::class, 'Utilisateur', 'firstname'))
+            ->add('category', EntityType::class, $this->getEntityConfiguration(Category::class, 'Categorie', 'name'))            
             ->add(
                 'images',
                 CollectionType::class,

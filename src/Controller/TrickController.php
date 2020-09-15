@@ -11,7 +11,9 @@ use App\Form\TrickType;
 use App\Form\CommentType;
 use App\Service\FileUploader;
 use App\Service\ImageUploader;
+use App\Repository\ImageRepository;
 use App\Repository\TrickRepository;
+use App\Repository\VideoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,6 +66,7 @@ class TrickController extends AbstractController
                 
             }
             
+            $trick->setUser($this->getUser());
             $manager->persist($trick);
             $manager->flush();
 
@@ -85,7 +88,7 @@ class TrickController extends AbstractController
      * Pour modifier un trick
      * 
      * @Route("/tricks/{slug}/edit", name="tricks_edit")
-     * @Security("is_granted('ROLE_USER') and user === trick.getUser()", message="Vous ne pouvez pas modifier ce Trick")
+     * @Security("is_granted('ROLE_USER')", message="Vous ne pouvez pas modifier ce Trick")
      * 
      * @param Trick $trick
      * @param Request $request
@@ -150,14 +153,31 @@ class TrickController extends AbstractController
      * Pour afficher plusieurs tricks
      * 
      * @Route("/", name="tricks_index")
-     *      * 
+     * @param TrickRepository $repo 
+     * @return Response
      */
+    
     public function index(TrickRepository $repository)
     {
-
-        //$repository = $this->getDoctrine()->getRepository(Trick::class);
-        $tricks = $repository->findAll();
+        $tricks = $repository->findBy([], ['createdAt' => 'ASC'], 9, 0);
         return $this->render('trick/index.html.twig', [
+            'tricks' => $tricks,
+        ]);
+        
+    }
+
+   
+
+    /**
+     * @Route("/{start}", name="moreTricks", requirements={"start": "\d+"})
+     * @param TrickRepository $repo
+     * @param int $start
+     * @return Response
+     */
+    public function moreTricks(TrickRepository $repo, $start = 9){
+        $tricks = $repo->findBy([], ['createdAt' => 'ASC'], 5, $start);
+
+        return $this->render('trick/moreTricks.html.twig', [
             'tricks' => $tricks
         ]);
     }
@@ -169,10 +189,11 @@ class TrickController extends AbstractController
      * 
      * @return Response
      */
-    public function show(Request $request,  Trick $trick, EntityManagerInterface $manager)
+    public function show(Request $request,  Trick $trick, EntityManagerInterface $manager, ImageRepository $repo_image, VideoRepository $repo_video)
     {
         
         $comment = new Comment();
+
         $form = $this->createForm(CommentType::class, $comment);
         
         $form->handleRequest($request);
@@ -194,9 +215,28 @@ class TrickController extends AbstractController
                 'slug' => $trick->getSlug()
             ]);
         }
+        $images = $repo_image->findBy(['trick' => $trick->getId()]);
+        $videos = $repo_video->findBy(['trick' => $trick->getId()]);
+
         return $this->render('trick/show.html.twig', [
             'form' => $form->createView(),
-            'trick' => $trick
+            'trick' => $trick,
+            'images' => $images,
+            'videos' => $videos
+        ]);
+    }
+
+    /**
+     * @Route("/trick/{slug}/{start}", name="moreComments", requirements={"start": "\d+"})
+     * @param Trick $trick
+     * @param int $start
+     * @return Response
+     */
+    public function moreComments(Trick $trick, $start = 3)
+    {
+        return $this->render('trick/moreComments.html.twig', [
+            'trick' => $trick,
+            'start' => $start
         ]);
     }
 
@@ -204,7 +244,7 @@ class TrickController extends AbstractController
      * Pour effacer un trick
      * 
      * @Route("/tricks/{slug}/delete", name="tricks_delete")
-     * @Security("is_granted('ROLE_USER') and user === trick.getUser()", message="Vous ne pouvez pas supprimer ce Trick")
+     * @Security("is_granted('ROLE_USER')", message="Vous ne pouvez pas supprimer ce Trick")
      * @return Response
      * 
      */
