@@ -42,10 +42,13 @@ class Image
     private $file;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Trick::class, inversedBy="images")
+     * @ORM\ManyToOne(targetEntity=Trick::class, inversedBy="images", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $trick;
+
+
+    
 
     public function getId(): ?int
     {
