@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\PasswordForgot;
 use App\Entity\PasswordUpdate;
 use App\Form\RegistrationType;
+use App\Service\ImageUploader;
 use App\Form\PasswordForgotType;
 use App\Form\PasswordUpdateType;
 use Symfony\Component\Mime\Email;
@@ -59,7 +60,7 @@ class AccountController extends AbstractController
      * @return Response
      */
 
-    public function register(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, SluggerInterface $slugger, MailerInterface $mailer)
+    public function register(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, ImageUploader $imageUploader , MailerInterface $mailer)
     {
         $user = new User;
 
@@ -70,34 +71,22 @@ class AccountController extends AbstractController
         if ($form->isSubmitted() && $form->isvalid()) {
             $password = $encoder->encodePassword($user, $user->getPassword());
             $user->setPassword($password);
-            $user->setToken($this->generateToken());
-            $avatarFile = $form->get('avatar')->getData();
+            $user->setToken($this->generateToken());      
 
-            // this condition is needed because the 'brochure' field is not required
-            // so the PDF file must be processed only when a file is uploaded
-            if ($avatarFile) {
-                $originalFilename = pathinfo($avatarFile->getClientOriginalName(), PATHINFO_FILENAME);
-                // this is needed to safely include the file name as part of the URL
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $avatarFile->guessExtension();
+            
 
-                // Move the file to the directory where brochures are stored
-                try {
-                    $avatarFile->move(
-                        $this->getParameter('images_directory'),
-                        $newFilename
-                    );
-                } catch (FileException $e) {
-                    // ... handle exception if something happens during file upload
-                }
 
-                // updates the 'brochureFilename' property to store the PDF file name
-                // instead of its contents
-                $user->setAvatar($newFilename);
-            }
+            $image = $form->get('avatar')->getData();
+
+            $avatar = $user->setFile($image);
+            $avatar = $imageUploader->uploadAvatar($avatar);
+            $manager->persist($avatar);            
+
 
             $manager->persist($user);
             $manager->flush();
+
+
             $nickname = $user->getNickname();
             $token = $user->getToken();
             $url = "http://localhost:8000/account/activation/$nickname/$token";

@@ -10,7 +10,6 @@ use App\Entity\Comment;
 use App\Form\TrickType;
 use App\Form\CommentType;
 use App\Service\FileUploader;
-use App\Service\ImageUploader;
 use App\Repository\ImageRepository;
 use App\Repository\TrickRepository;
 use App\Repository\VideoRepository;
@@ -22,40 +21,44 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+
 class TrickController extends AbstractController
 {
-    
-     /**
+
+    /**
      * Pour créer un trick
      *
      * @Route("/tricks/new", name="tricks_create")
      * @IsGranted("ROLE_USER")
      * 
      * @param Request $request
-     * @param EntityManagerInterface $manager
-     * @param ImageUploader $imageUploader
-     * @param FileUploader $fileUploader
+     * @param EntityManagerInterface $manager     *     
+     * @param FileUploader $fileUploader    
      * @return Response
      */
-    public function create(Request $request, EntityManagerInterface $manager, ImageUploader $imageUploader, FileUploader $fileUploader)
-    { 
+    public function create(Request $request, EntityManagerInterface $manager, FileUploader $fileUploader)
+    {
         $trick = new Trick();
-       
+
+
+
         $form = $this->createForm(TrickType::class, $trick);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isvalid()) {            
-            
+        if ($form->isSubmitted() && $form->isvalid()) {
+
             $imageFile = $form->get('coverImage')->getData();
 
             if ($imageFile) {
-            $imageFileName = $fileUploader->upload($imageFile);
-            $trick->setCoverImage($imageFileName);
+                $imageFileName = $fileUploader->upload($imageFile);
+                $trick->setCoverImage($imageFileName);
             }
 
+
             foreach ($trick->getImages() as $image) {
+                $fileName = $fileUploader->upload($image->getFile());
+                $image->setPath($fileName);
                 $image->setTrick($trick);
-                $image = $imageUploader->uploadImage($image);
 
                 $manager->persist($image);
             }
@@ -63,9 +66,8 @@ class TrickController extends AbstractController
             foreach ($trick->getVideos() as $video) {
                 $video->setTrick($trick);
                 $manager->persist($video);
-                
             }
-            
+
             $trick->setUser($this->getUser());
             $manager->persist($trick);
             $manager->flush();
@@ -83,7 +85,7 @@ class TrickController extends AbstractController
             'form' => $form->createView()
         ]);
     }
-    
+
     /**
      * Pour modifier un trick
      * 
@@ -92,44 +94,48 @@ class TrickController extends AbstractController
      * 
      * @param Trick $trick
      * @param Request $request
+     * @param FileUploader $fileUploader 
      * @return Response
      */
-    public function edit(Trick $trick, Request $request, EntityManagerInterface $manager, ImageUploader $imageUploader, FileUploader $fileUploader ){
-        
-       
+    public function edit(Trick $trick, Request $request, EntityManagerInterface $manager, FileUploader $fileUploader)
+    {
+
+
         $form = $this->createForm(TrickType::class, $trick);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isvalid()) {
-            
+
             $imageFile = $form->get('coverImage')->getData();
 
-            
-            
-            
             if ($imageFile) {
-                $fileUploader->removeFile($trick->getCoverImage ());
+                $fileUploader->removeFile($trick->getCoverImage());
                 $imageFileName = $fileUploader->upload($imageFile);
                 $trick->setCoverImage($imageFileName);
-                }
-                
-                $images = $form->get('images')->getData();
-                foreach ($images as $image) {                   
-                       
+            }
+
+
+            foreach ($trick->getImages() as $image) {
+                $file = $image->getFile();
+                if ($file) {
+                    if ($image->getPath()) {
+                        $fileUploader->removeFile($image->getPath());
+                    }
+                    $fileName = $fileUploader->upload($image->getFile());
+                    $image->setPath($fileName);
                     $image->setTrick($trick);
-                    $image = $imageUploader->uploadImage($image);
-    
+
                     $manager->persist($image);
-                
-                }                     
-                    
-                foreach ($trick->getVideos() as $video) {
-                    $video->setTrick($trick);
-                    $manager->persist($video);
-                    
                 }
-                
-            $manager->persist($trick);                      
+            }
+
+
+            foreach ($trick->getVideos() as $video) {
+                $video->setTrick($trick);
+                $manager->persist($video);
+            }
+
+            $manager->persist($trick);
             $manager->flush();
 
             $this->addFlash(
@@ -138,17 +144,17 @@ class TrickController extends AbstractController
             );
 
             return $this->redirectToRoute('tricks_show', [
-                'slug' => $trick->getSlug(),                
+                'slug' => $trick->getSlug(),
             ]);
         }
 
-        return $this->render('trick/edit.html.twig',[
+        return $this->render('trick/edit.html.twig', [
             'form' => $form->createView(),
             'trick' => $trick
         ]);
     }
-    
-    
+
+
     /**
      * Pour afficher plusieurs tricks
      * 
@@ -156,17 +162,16 @@ class TrickController extends AbstractController
      * @param TrickRepository $repo 
      * @return Response
      */
-    
+
     public function index(TrickRepository $repository)
     {
         $tricks = $repository->findBy([], ['createdAt' => 'ASC'], 9, 0);
         return $this->render('trick/index.html.twig', [
             'tricks' => $tricks,
         ]);
-        
     }
 
-   
+
 
     /**
      * @Route("/{start}", name="moreTricks", requirements={"start": "\d+"})
@@ -174,7 +179,8 @@ class TrickController extends AbstractController
      * @param int $start
      * @return Response
      */
-    public function moreTricks(TrickRepository $repo, $start = 9){
+    public function moreTricks(TrickRepository $repo, $start = 9)
+    {
         $tricks = $repo->findBy([], ['createdAt' => 'ASC'], 5, $start);
 
         return $this->render('trick/moreTricks.html.twig', [
@@ -191,18 +197,18 @@ class TrickController extends AbstractController
      */
     public function show(Request $request,  Trick $trick, EntityManagerInterface $manager, ImageRepository $repo_image, VideoRepository $repo_video)
     {
-        
+
         $comment = new Comment();
 
         $form = $this->createForm(CommentType::class, $comment);
-        
-        $form->handleRequest($request);
-        
-        if($form->isSubmitted() && $form->isValid()){
 
-            $user= $this->getUser();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $user = $this->getUser();
             $comment->setTrick($trick)
-                    ->setUser($user);
+                ->setUser($user);
             $manager->persist($comment);
             $manager->flush();
 
@@ -248,43 +254,43 @@ class TrickController extends AbstractController
      * @return Response
      * 
      */
-    public function delete(Trick $trick, EntityManagerInterface $manager, FileUploader $fileUploader){
+    public function delete(Trick $trick, EntityManagerInterface $manager, FileUploader $fileUploader)
+    {
         $manager->remove($trick);
         $manager->flush();
 
-            $fileUploader->removeFile($trick->getCoverImage ());
-            $images = $trick->getImages();
-            foreach ($images as $image) {
-                $fileUploader->removeFile($image->getPath());
-               
-            }
+        $fileUploader->removeFile($trick->getCoverImage());
+        $images = $trick->getImages();
+        foreach ($images as $image) {
+            $fileUploader->removeFile($image->getPath());
+        }
         $this->addFlash(
             'success',
             "Le trick {$trick->getName()} a bien été supprimé"
         );
 
         return $this->redirectToRoute('tricks_index');
-
     }
 
-   /**
+    /**
      * @Route("/tricks/delete/image/{id}", name="trick_delete_image")
      * @param Image $image
      * @param FileUploader $fileUploader
      * @return Response
      */
-    public function deleteImage( Image $image , EntityManagerInterface $manager,  FileUploader $fileUploader)
+    public function deleteImage(Image $image, EntityManagerInterface $manager,  FileUploader $fileUploader)
     {
-        
-            $fileUploader->removeFile($image->getPath());
-            $manager->remove($image);
-            $manager->flush();
-            
-            $this->addFlash(
-                'success',
-                "Photo supprimée avec succès");
-               
-            return $this->redirectToRoute('tricks_index');        
+
+        $fileUploader->removeFile($image->getPath());
+        $manager->remove($image);
+        $manager->flush();
+
+        $this->addFlash(
+            'success',
+            "Photo supprimée avec succès"
+        );
+
+        return $this->redirectToRoute('tricks_index');
     }
 
 
@@ -293,18 +299,18 @@ class TrickController extends AbstractController
      * @param Video $video
      * @return Response
      */
-    public function deleteVideo( Video $video  , EntityManagerInterface $manager)
+    public function deleteVideo(Video $video, EntityManagerInterface $manager)
     {
-        
-             
-            $manager->remove($video);
-            $manager->flush();
-            
-            $this->addFlash(
-                'success',
-                "Vidéo supprimée avec succès");
-               
-            return $this->redirectToRoute('tricks_index');        
+
+
+        $manager->remove($video);
+        $manager->flush();
+
+        $this->addFlash(
+            'success',
+            "Vidéo supprimée avec succès"
+        );
+
+        return $this->redirectToRoute('tricks_index');
     }
- 
 }

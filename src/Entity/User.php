@@ -7,9 +7,10 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -68,7 +69,9 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)  
      */
-    private $avatar;    
+    private $avatar; 
+    
+    private $file;
 
     /**
      * @ORM\OneToMany(targetEntity=Trick::class, mappedBy="user", orphanRemoval=true)
@@ -189,7 +192,19 @@ class User implements UserInterface
         $this->avatar = $avatar;
 
         return $this;
-    }    
+    }
+    
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function setFile(UploadedFile $file): self
+    {
+        $this->file = $file;
+
+        return $this;
+    }
 
     /**
      * @return Collection|Trick[]

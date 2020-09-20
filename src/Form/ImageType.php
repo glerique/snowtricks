@@ -20,9 +20,9 @@ class ImageType extends ApplicationType
             FileType::class,
 
                 [
-                    'required' => false,
+                    'required' => false,                    
                     'attr' => [
-                        'placeholder' => 'Image de trick'
+                        'placeholder' => 'Image de trick'                    
                     ]
                         ]) 
         ->add('caption', TextType::class, $this->getConfiguration("Légende", "Légende de l'image"))                ; 
