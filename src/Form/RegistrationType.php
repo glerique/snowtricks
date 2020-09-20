@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\User;
 use App\Form\ApplicationType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -28,7 +29,21 @@ class RegistrationType extends ApplicationType
             ->add('confirmPassword', PasswordType::class, $this->getConfiguration("Confirmation du mot de passe","Confirmation du mot de passe"))
             ->add('avatar', FileType::class,  [
                 'label' => 'Avatar',
-                'mapped' => false 
+                'mapped' => false,                
+                'attr' => [
+                    'placeholder' => 'Avatar'
+                ],
+                'mapped' => false,
+                'required' => false,
+                'constraints' => [
+                    new File([
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image jpeg ou png',                        
+                    ])
+                ] 
             ])
         ;
     }
