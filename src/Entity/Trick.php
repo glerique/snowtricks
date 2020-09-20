@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @ORM\Entity(repositoryClass=TrickRepository::class)
@@ -58,6 +59,9 @@ class Trick
      */
     private $coverImage;
 
+
+    private $file;
+
     /**
      * @ORM\Column(type="string", length=255)
      * 
@@ -77,7 +81,7 @@ class Trick
     private $user;
 
     /**
-     * @ORM\OneToMany(targetEntity=Image::class, mappedBy="trick", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Image::class, mappedBy="trick", cascade={"persist", "remove"}, orphanRemoval=true)
      * @Assert\Valid()
      */
     private $images;
@@ -198,6 +202,18 @@ class Trick
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function setFile(UploadedFile $file): self
+    {
+        $this->file = $file;
 
         return $this;
     }
