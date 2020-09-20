@@ -32,8 +32,7 @@ class TrickType extends ApplicationType
                 'mapped' => false,
                 'attr' => [
                     'placeholder' => 'Image de couverture'
-                ],
-                'mapped' => false,
+                ],                
                 'required' => false,
                 'constraints' => [
                     new File([
