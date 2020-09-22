@@ -2,7 +2,7 @@
     {% if comment is not null %}
         <div class="row post-comment">                        
             <h6 class="col-sm-3">
-            <img src="{{ asset('/img/' ~ comment.user.avatar) }}" class="img-fluid avatar"/ WIDTH=50>
+            <img src="{{ asset('/uploads/images/' ~ comment.user.avatar) }}" class="img-fluid avatar"/ WIDTH=50>
             <strong>{{ comment.user.nickname }}</strong><br/> publié le {{ comment.createdAT|date("d/m/Y") }}<br />                        
             </h6>
                         
