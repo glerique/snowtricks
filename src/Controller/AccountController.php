@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\FileUploader;
 use App\Entity\PasswordForgot;
 use App\Entity\PasswordUpdate;
 use App\Form\RegistrationType;
-use App\Service\ImageUploader;
 use App\Form\PasswordForgotType;
 use App\Form\PasswordUpdateType;
 use Symfony\Component\Mime\Email;
@@ -60,7 +60,7 @@ class AccountController extends AbstractController
      * @return Response
      */
 
-    public function register(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, ImageUploader $imageUploader , MailerInterface $mailer)
+    public function register(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, MailerInterface $mailer, FileUploader $fileUploader)
     {
         $user = new User;
 
@@ -77,10 +77,15 @@ class AccountController extends AbstractController
 
 
             $image = $form->get('avatar')->getData();
-
+            /*    
             $avatar = $user->setFile($image);
             $avatar = $imageUploader->uploadAvatar($avatar);
-            $manager->persist($avatar);            
+            $manager->persist($avatar);  
+            */
+            if ($image) {
+                $imageFileName = $fileUploader->upload($image);
+                $user->setAvatar($imageFileName);
+            }
 
 
             $manager->persist($user);
