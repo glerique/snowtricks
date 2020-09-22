@@ -1,6 +1,8 @@
 # snowtricks
 Site communautaire SnowTricks
-
+<hr />
+<a href="https://codeclimate.com/github/glerique/snowtricks/maintainability"><img src="https://api.codeclimate.com/v1/badges/336362315ff88c62e1c8/maintainability" /></a>
+<hr />
 Projet 5 de mon parcours Développeur d'application PHP/Symfony chez OpenClassrooms. Création d'un site collaboratif pour faire connaître ce sport auprès du grand public et aider à l'apprentissage des figures (tricks).
 
 Installation
