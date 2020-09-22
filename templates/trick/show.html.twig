@@ -22,7 +22,7 @@
                                 Catégorie : {{ trick.category.name }}
                             </li> |
                             <li class="list-inline-item">
-                                <a href="#comments-block">{{ trick.comments | length }} commentaires</a>
+                                {{ trick.comments | length }} commentaires
                             </li> |
                             {% if (app.user) %}
                                 {% set edit = path('tricks_edit', {slug : trick.slug}) %}
@@ -151,7 +151,9 @@
                     <button id="moreComments" class="btn btn-primary">Plus de commentaires</button>
                 </div>
             {% endif %}
-    </div>    
+             </div>    
+        </diV>
+    </diV>
  {% endblock %}
  
  {% block javascripts %}
@@ -174,6 +176,6 @@
             });
         }
 
-        document.getElementById("moreComments").addEventListener("click", moreComments);
-    </script>
+        document.getElementById("moreComments").addEventListener("click", moreComments);        
+    </script> 
 {% endblock %}
