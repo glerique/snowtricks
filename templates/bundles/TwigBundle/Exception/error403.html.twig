@@ -3,15 +3,21 @@
 {% block title %}Vous n'avez pas le droit d'accéder à cette ressource{% endblock %}
 
 {% block body %}
+<div class="container">
+    <div class="row mt-5 mb-5">
+        <div class="col-md-3">&nbsp;</div>
+            <div class="col-md-6 mt-5 mb-5">
+                 <div class="bg-light py-3 px-3 mt-5 mb-5">    
+                    <div class="alert alert-danger">
+                        <h1>Vous n'avez pas le droit d'accéder à cette ressource !</h1> 
+                         <p> Vous pouvez retourner à l'accueil ou consultez nos derniers Tricks !</p>
+                    </div>
 
-    <div class="container">
-        <div class="alert alert-danger">
-        <h1>Vous n'avez pas le droit d'accéder à cette ressource !</h1>         
-        
-           <p> Vous pouvez retourner à l'accueil ou consultez nos derniers Tricks !</p>
-        </div>
-
-        <a href="{{ path('tricks_index') }}" class="btn btn-primary">Retour à l'accueil</a>
+                    <a href="{{ path('tricks_index') }}" class="btn btn-primary">Retour à l'accueil</a>
+                </div>
+            </div>
+        </diV>
     </div>
-
+    <div class="row mt-5 mb-5"> &nbsp;</div>
+</div>
 {% endblock %}

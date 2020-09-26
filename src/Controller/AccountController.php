@@ -3,22 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Service\FileUploader;
 use App\Entity\PasswordForgot;
 use App\Entity\PasswordUpdate;
 use App\Form\RegistrationType;
+use App\Service\AccountService;
 use App\Form\PasswordForgotType;
 use App\Form\PasswordUpdateType;
-use Symfony\Component\Mime\Email;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
@@ -60,7 +56,7 @@ class AccountController extends AbstractController
      * @return Response
      */
 
-    public function register(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder, MailerInterface $mailer, FileUploader $fileUploader)
+    public function register(Request $request, AccountService $accountService)
     {
         $user = new User;
 
@@ -69,41 +65,11 @@ class AccountController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isvalid()) {
-            $password = $encoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
-            $user->setToken($this->generateToken());      
-
             
 
-
             $image = $form->get('avatar')->getData();
-            /*    
-            $avatar = $user->setFile($image);
-            $avatar = $imageUploader->uploadAvatar($avatar);
-            $manager->persist($avatar);  
-            */
-            if ($image) {
-                $imageFileName = $fileUploader->upload($image);
-                $user->setAvatar($imageFileName);
-            }
-
-
-            $manager->persist($user);
-            $manager->flush();
-
-
-            $nickname = $user->getNickname();
-            $token = $user->getToken();
-            $url = "http://localhost:8000/account/activation/$nickname/$token";
-            $email = (new Email())
-                ->from('no-reply@example.com')
-                ->to($user->getEmail())
-                ->subject("Snowtricks - Finalisation de l'inscription")
-                ->html('<h3>Bienvenue sur Snowtricks!</h3>
-                    <p>Pour finaliser votre inscription, cliquez sur le lien suivant: 
-                    <a href="' . $url . '">Finaliser l\'inscription</a></p>');
-
-            $mailer->send($email);
+            
+            $accountService->createUser($user, $image);
 
             $this->addFlash(
                 'success',
@@ -125,7 +91,7 @@ class AccountController extends AbstractController
      * @return Response
      */
     
-    public function forgotPassword( Request $request, UserRepository $repository,  EntityManagerInterface $manager, MailerInterface $mailer){
+    public function forgotPassword( Request $request, UserRepository $repository, AccountService $accountService){
 
         //creation du formulaire avec PasswordForgotType
         $passwordForgot = new PasswordForgot();
@@ -143,26 +109,10 @@ class AccountController extends AbstractController
                 $this->addFlash('danger', 'aucun utilisateur correspondant');
             }else{
 
-                $nickname = $user->getNickname();                
-                // Génération d'un nouveau token pour plus de sécurité
-                $user->setToken($this->generateToken());           
-                // Update de la base de donnée avec le nouveau Token
-                $token = $user->getToken();
-                $manager->persist($user);
-                $manager->flush();
-               
-                $url = "http://localhost:8000/account/update/$nickname/$token";
-                $email = (new Email())
-                    ->from('no-reply@example.com')
-                    ->to($user->getEmail())
-                    ->subject("Snowtricks - Réinitialisation du mot de passe")
-                    ->html('<h3>Snowtricks - Mot de passe oublié</h3>
-                        <p>Pour choisir un nouveau mot de passe, cliquez sur le lien suivant: 
-                        <a href="'.$url.'" class="alert-link">Redéfinir le mot de passe</a></p>');
-                $mailer->send($email);
-
-                $this->addFlash('success', 'Un e-mail vous a été envoyé. Cliquez sur le lien contenu dans cet e-mail pour redéfinir votre mot de passe');
-                return $this->redirectToRoute('account_login');
+               $accountService->forgot($user);
+                
+               $this->addFlash('success', 'Un e-mail vous a été envoyé. Cliquez sur le lien contenu dans cet e-mail pour redéfinir votre mot de passe');
+               return $this->redirectToRoute('account_login');
             }
         }
 
@@ -180,7 +130,7 @@ class AccountController extends AbstractController
      *@return Response 
      */
 
-    public function updatePassword(Request $request, UserRepository $repository, $nickname, $token, UserPasswordEncoderInterface $encoder,  EntityManagerInterface $manager)
+    public function updatePassword(Request $request, UserRepository $repository, $nickname, $token, AccountService $accountService )
     {
         $passwordUpdate = new PasswordUpdate();
 
@@ -205,20 +155,14 @@ class AccountController extends AbstractController
         $form = $this->createForm(PasswordUpdateType::class, $passwordUpdate);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) { 
+            $newPassword = $passwordUpdate->getNewPassword();
 
-            
-                $newPassword = $passwordUpdate->getNewPassword();
-                $password = $encoder->encodePassword($user, $newPassword);
-
-                $user->setPassword($password);
-
-                $manager->persist($user);
-                $manager->flush();
-
-                $this->addFlash(
+            $accountService->passwordUpdate($newPassword, $user);
+                
+            $this->addFlash(
                     'success',
-                    "Votre mot de passe a bien été modifié !"
+                     "Votre mot de passe a bien été modifié !"
                 );
 
                 return $this->redirectToRoute('account_login');
@@ -232,14 +176,10 @@ class AccountController extends AbstractController
 
     /**
      * @Route("account/activation/{nickname}/{token}", name="account_activation")
-     *
-     * @param UserRepository $repo
-     * @param $email
-     * @param $token
-     * @param EntityManagerInterface $manager
+     *  
      * @return RedirectResponse
      */
-    public function AccountValidation(UserRepository $repository, $nickname, $token, EntityManagerInterface $manager)
+    public function AccountValidation(UserRepository $repository, $nickname, $token, AccountService $accountService)
     {
         $user = $repository->findOneByNickname($nickname);
 
@@ -259,25 +199,12 @@ class AccountController extends AbstractController
             return $this->redirectToRoute('account_login');
         }
                 
-        $user->setValidated("1");
-        $manager->persist($user);
-        $manager->flush();
+        $accountService->activateUser($user);
 
         $this->addFlash(
             'success',
             "Votre compte a été activé avec succès !"
         );
         return $this->redirectToRoute('account_login');
-    }
-
-    /**
-     * Génération du token de validation d'incription
-     *
-     * @return string
-     */
-    public function generateToken()
-    {
-
-        return md5(bin2hex(openssl_random_pseudo_bytes(6)));
-    }
+    }    
 }
