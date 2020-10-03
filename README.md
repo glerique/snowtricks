@@ -8,12 +8,21 @@
 Installation
 
     - Clonez le repository GitHub
-    - Configurez vos variables d'environnement dans le fichier .env : La connexion à la base de données et celle du mailer 
+    
+    - Configurez vos variables d'environnement dans le fichier .env :
+    
+      => MAILER_DSN=smtp://utilisateur:password@smtp.gmail.com:587 pour le mailer
+      => DATABASE_URL=mysql://root:@127.0.0.1:3306/snowtricks?serverVersion=5.7 pour la base de données
+      
     - Téléchargez et installez les dépendances du projet avec la commande Composer suivante : composer install
+    
     - Créez la base de données en utilisant la commande suivante : php bin/console doctrine:database:create
+    
     - Installer les fixtures pour avoir un jeu de données fictives avec la commande suivante : php bin/console doctrine:fixtures:load
+    
     - Lancez le serveur à l'aide de la commande suivante : php -S localhost:8000 -t public
-    - Vous pouvez désormais commencer à utiliser l'appication Snowtricks 
+    
+    - Vous pouvez désormais commencer à utiliser l'appication Snowtricks sur http://localhost:8000/
     
 
     
