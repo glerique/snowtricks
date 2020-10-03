@@ -38,7 +38,7 @@ class Trick
     /**
      * @ORM\Column(type="text")
      * @Assert\NotBlank(message="Vous devez renseigner une description")
-     * @Assert\Length(min=10, max=255, minMessage="Votre description ne peut pas faire moins de 10 caractères", maxMessage="Votre description ne doit pas dépasser plus de 255 caractères")    
+     * @Assert\Length(min=10, max=1555, minMessage="Votre description ne peut pas faire moins de 10 caractères", maxMessage="Votre description ne doit pas dépasser plus de 1555 caractères")    
      */
     private $description;
 
