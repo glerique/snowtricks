@@ -13,17 +13,17 @@
                     <div class="card-body">                    
                         <ul class="list-inline trick-data">
                             <li class="list-inline-item">
-                                Par : {{ trick.user.username }}
-                            </li> |           
-                            <li class="list-inline-item">
-                                Ajouté le {{ trick.createdAt | date('d/m/Y') }} (<small>Mise à jour le : {% if trick.modifiedAt is defined %}{{ trick.modifiedAt | date('d/m/Y') }}{% endif %}</small>)
-                            </li> |                            
+                                Par : {{ trick.user.nickname }}
+                            </li>|           
+                            <li class="list-inline-item">                            
+                                Ajouté le {{ trick.createdAt | date('d/m/Y') }} {% if trick.modifiedAt is not null%} (<small>Mise à jour le : {{ trick.modifiedAt | date('d/m/Y') }}</small>){% endif %}
+                            </li>|                            
                             <li class="list-inline-item">
                                 Catégorie : {{ trick.category.name }}
-                            </li> |
+                            </li>|
                             <li class="list-inline-item">
                                 {{ trick.comments | length }} commentaires
-                            </li> |
+                            </li>|
                             {% if (app.user) %}
                                 {% set edit = path('tricks_edit', {slug : trick.slug}) %}
                                 {% set delete = path('tricks_delete', {slug : trick.slug}) %}
