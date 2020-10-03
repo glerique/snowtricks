@@ -1,6 +1,6 @@
 # snowtricks
 <p>Projet 6 du parcours développeur d'application PHP/Symfony chez OpenClassrooms :</p>
-<p>Création d'un site collaboratif de partage de figures de snowboard via le framework Symfony</p>
+<p>Création d'un site communautaire de partage de figures de snowboard via le framework Symfony</p>
 <p>Réalisé en PHP 7.3.5 et Symfony 5.1.2</p>
 <hr />
 <a href="https://codeclimate.com/github/glerique/snowtricks/maintainability"><img src="https://api.codeclimate.com/v1/badges/336362315ff88c62e1c8/maintainability" /></a>
