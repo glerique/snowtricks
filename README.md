@@ -7,9 +7,8 @@
 <hr />
 Installation
 
-    Clonez le repository.
     - Clonez le repository GitHub
-    - Configurez vos variables d'environnement suivantes dans le fichier .env : La connexion à la base de données et la connexion au mailer 
+    - Configurez vos variables d'environnement dans le fichier .env : La connexion à la base de données et celle du mailer 
     - Téléchargez et installez les dépendances du projet avec la commande Composer suivante : composer install
     - Créez la base de données en utilisant la commande suivante : php bin/console doctrine:database:create
     - Installer les fixtures pour avoir un jeu de données fictives avec la commande suivante : php bin/console doctrine:fixtures:load
