@@ -5,7 +5,7 @@
 <hr />
 <a href="https://codeclimate.com/github/glerique/snowtricks/maintainability"><img src="https://api.codeclimate.com/v1/badges/336362315ff88c62e1c8/maintainability" /></a>
 <hr />
-Installation
+Installation : 
 
     - Clonez le repository GitHub
     
