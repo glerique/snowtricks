@@ -6,7 +6,8 @@ use App\Entity\User;
 use App\Service\FileUploader;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 
 
 class AccountService
@@ -16,24 +17,24 @@ class AccountService
 
     private $fileUploader;
 
-    private $encoder;
+    private $hasher;
 
     private $mailerService;
 
-    public function __construct(EntityManagerInterface $manager, FileUploader $fileUploader, MailerService $mailerService,  UserPasswordEncoderInterface $encoder)
+    public function __construct(EntityManagerInterface $manager, FileUploader $fileUploader, MailerService $mailerService,  UserPasswordHasherInterface $hasher)
 
 
     {
         $this->manager = $manager;
         $this->fileUploader = $fileUploader;
         $this->mailerService = $mailerService;
-        $this->encoder = $encoder;
+        $this->hasher = $hasher;
     }
 
     public function createUser($user, $image)
     {
 
-        $password = $this->encoder->encodePassword($user, $user->getPassword());
+        $password = $this->hasher->hashPassword($user, $user->getPassword());
         $user->setPassword($password);
         $user->setToken($this->generateToken());
 
@@ -77,7 +78,7 @@ class AccountService
     {
 
 
-        $password = $this->encoder->encodePassword($user, $newPassword);
+        $password = $this->hasher->hashPassword($user, $newPassword);
 
         $user->setPassword($password);
 

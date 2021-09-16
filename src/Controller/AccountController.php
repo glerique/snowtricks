@@ -10,13 +10,12 @@ use App\Service\AccountService;
 use App\Form\PasswordForgotType;
 use App\Form\PasswordUpdateType;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+
 
 class AccountController extends AbstractController
 {
@@ -65,10 +64,10 @@ class AccountController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isvalid()) {
-            
+
 
             $image = $form->get('avatar')->getData();
-            
+
             $accountService->createUser($user, $image);
 
             $this->addFlash(
@@ -76,7 +75,7 @@ class AccountController extends AbstractController
                 "L'utilisateur a bien été enregistré. Un mail vous a été envoyé pour finaliser votre inscription. Cliquez sur le lien contenu dans cet e-mail pour valider votre compte."
             );
 
-            
+
             return $this->redirectToRoute('account_login');
         }
         return $this->render('account/registration.html.twig', [
@@ -90,29 +89,30 @@ class AccountController extends AbstractController
      * 
      * @return Response
      */
-    
-    public function forgotPassword( Request $request, UserRepository $repository, AccountService $accountService){
+
+    public function forgotPassword(Request $request, UserRepository $repository, AccountService $accountService)
+    {
 
         //creation du formulaire avec PasswordForgotType
         $passwordForgot = new PasswordForgot();
         $form = $this->createForm(PasswordForgotType::class, $passwordForgot);
         $form->handleRequest($request);
 
-        if($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
 
-           
+
             $email = $passwordForgot->getEmail();
             //Verification que l'adresse est dans la base de donnée
             $user = $repository->findOneByEmail($email);
 
-            if($user == false){
+            if ($user == false) {
                 $this->addFlash('danger', 'aucun utilisateur correspondant');
-            }else{
+            } else {
 
-               $accountService->forgot($user);
-                
-               $this->addFlash('success', 'Un e-mail vous a été envoyé. Cliquez sur le lien contenu dans cet e-mail pour redéfinir votre mot de passe');
-               return $this->redirectToRoute('account_login');
+                $accountService->forgot($user);
+
+                $this->addFlash('success', 'Un e-mail vous a été envoyé. Cliquez sur le lien contenu dans cet e-mail pour redéfinir votre mot de passe');
+                return $this->redirectToRoute('account_login');
             }
         }
 
@@ -120,8 +120,8 @@ class AccountController extends AbstractController
             'form' => $form->createView()
         ]);
     }
-    
-    
+
+
     /**
      *Modifier le mot de passe
      *
@@ -130,13 +130,13 @@ class AccountController extends AbstractController
      *@return Response 
      */
 
-    public function updatePassword(Request $request, UserRepository $repository, $nickname, $token, AccountService $accountService )
+    public function updatePassword(Request $request, UserRepository $repository, $nickname, $token, AccountService $accountService)
     {
         $passwordUpdate = new PasswordUpdate();
 
         $user = $repository->findOneByNickname($nickname);
 
-        
+
         if (!$user) {
             $this->addFlash(
                 'danger',
@@ -155,24 +155,24 @@ class AccountController extends AbstractController
         $form = $this->createForm(PasswordUpdateType::class, $passwordUpdate);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) { 
+        if ($form->isSubmitted() && $form->isValid()) {
             $newPassword = $passwordUpdate->getNewPassword();
 
             $accountService->passwordUpdate($newPassword, $user);
-                
-            $this->addFlash(
-                    'success',
-                     "Votre mot de passe a bien été modifié !"
-                );
 
-                return $this->redirectToRoute('account_login');
-            }
-        
+            $this->addFlash(
+                'success',
+                "Votre mot de passe a bien été modifié !"
+            );
+
+            return $this->redirectToRoute('account_login');
+        }
+
         return $this->render('account/update.html.twig', [
             'form' => $form->createView()
         ]);
     }
-    
+
 
     /**
      * @Route("account/activation/{nickname}/{token}", name="account_activation")
@@ -198,7 +198,7 @@ class AccountController extends AbstractController
             );
             return $this->redirectToRoute('account_login');
         }
-                
+
         $accountService->activateUser($user);
 
         $this->addFlash(
@@ -206,5 +206,5 @@ class AccountController extends AbstractController
             "Votre compte a été activé avec succès !"
         );
         return $this->redirectToRoute('account_login');
-    }    
+    }
 }

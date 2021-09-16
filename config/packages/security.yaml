@@ -1,5 +1,10 @@
 security:
-    encoders:
+
+    enable_authenticator_manager: true
+    
+
+    password_hashers:
+        #Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
         App\Entity\User:
             algorithm: bcrypt
 
@@ -16,7 +21,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            anonymous: true
+            
             lazy: true
             provider: users_in_database
             
@@ -27,7 +32,8 @@ security:
             logout:
                 path: account_logout
                 target: account_login    
-            
+        
+       
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
