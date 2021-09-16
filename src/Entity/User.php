@@ -3,14 +3,16 @@
 namespace App\Entity;
 
 
+
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -24,7 +26,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 
 
-class User implements UserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id()
@@ -69,8 +71,8 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)  
      */
-    private $avatar; 
-    
+    private $avatar;
+
     private $file;
 
     /**
@@ -193,7 +195,7 @@ class User implements UserInterface
 
         return $this;
     }
-    
+
     public function getFile()
     {
         return $this->file;
@@ -268,24 +270,39 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getSalt() {}
-    
-    public function getRoles() {
-        $roles = $this->userRoles->map(function($role){
+    public function getSalt()
+    {
+    }
+
+    public function getRoles()
+    {
+        $roles = $this->userRoles->map(function ($role) {
             return $role->getName();
         })->toArray();
 
-        if ($this->getValidated() != null){
-        $roles[] = 'ROLE_USER';
+        if ($this->getValidated() != null) {
+            $roles[] = 'ROLE_USER';
         }
         return $roles;
     }
-    
-    public function getUsername() {
+
+    public function getUsername()
+    {
         return $this->email;
     }
 
-    public function eraseCredentials() {
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return  $this->email;
+    }
+
+    public function eraseCredentials()
+    {
     }
 
     /**

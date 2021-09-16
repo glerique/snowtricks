@@ -8,18 +8,19 @@ use App\Entity\Trick;
 use App\Entity\Video;
 use App\Entity\Comment;
 use App\Entity\Category;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use \Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 
 class AppFixtures extends Fixture
 {
-    private $encoder;
+    private $hasher;
 
-    public function __construct(UserPasswordEncoderInterface $encoder)
+    public function __construct(UserPasswordHasherInterface $hasher)
     {
-        $this->encoder = $encoder;
+        $this->hasher = $hasher;
     }
 
     public function load(ObjectManager $manager)
@@ -28,7 +29,7 @@ class AppFixtures extends Fixture
         $users = [];
         for ($i = 1; $i < 11; $i++) {
             $user = new User();
-            $password = $this->encoder->encodePassword($user, 'password');
+            $password = $this->hasher->hashPassword($user, 'password');
 
             $user->setLastName("Nom$i")
                 ->setfirstName("Prenom$i")
@@ -79,7 +80,7 @@ class AppFixtures extends Fixture
             $tricks[] = $trick;
         }
 
-       
+
 
         for ($i = 1; $i < 11; $i++) {
             $trick = $tricks[mt_rand(0, count($tricks) - 1)];
@@ -92,7 +93,7 @@ class AppFixtures extends Fixture
 
             $manager->persist($comment);
         }
-        
+
         for ($i = 1; $i < 11; $i++) {
             $trick = $tricks[mt_rand(0, count($tricks) - 1)];
             $image = new Image();
@@ -102,9 +103,9 @@ class AppFixtures extends Fixture
 
             $manager->persist($image);
         }
-        
+
         for ($i = 1; $i < 11; $i++) {
-            $trick = $tricks[mt_rand(0, count($tricks) - 1)];           
+            $trick = $tricks[mt_rand(0, count($tricks) - 1)];
             $video = new Video();
             $video->setUrl("https://www.youtube.com/embed/Hgv44f3ygOk")
                 ->setCaption("Le gende de la vidéo $i")
@@ -112,8 +113,8 @@ class AppFixtures extends Fixture
 
             $manager->persist($video);
         }
-        
-           
+
+
         $manager->flush();
     }
 }
